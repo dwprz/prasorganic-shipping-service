@@ -63,6 +63,19 @@ func (s *ShippingImpl) CacheSuburbsByCityId(ctx context.Context, cityId int, p *
 	}
 }
 
+func (s *ShippingImpl) CacheAreasBySuburbId(ctx context.Context, suburbId int, p *dto.ShipperRes[[]*entity.Area]) {
+	b, err := json.Marshal(p)
+	if err != nil {
+		log.Logger.WithFields(logrus.Fields{"location": "cache.ShippingImpl/CacheAreasBySuburbId", "section": "json.Marshal"}).Error(err)
+		return
+	}
+
+	key := fmt.Sprintf("suburb_id:%d:areas", suburbId)
+	if _, err := s.redis.SetEx(ctx, key, string(b), 24*time.Hour).Result(); err != nil {
+		log.Logger.WithFields(logrus.Fields{"location": "cache.ShippingImpl/CacheAreasBySuburbId", "section": "redis.SetEx"}).Error(err)
+	}
+}
+
 func (s *ShippingImpl) FindProvinces(ctx context.Context) *dto.ShipperRes[[]*entity.Province] {
 	res, err := s.redis.Get(ctx, "provinces").Result()
 	if err != nil {
@@ -125,4 +138,26 @@ func (s *ShippingImpl) FindSuburbsByCityId(ctx context.Context, cityId int) *dto
 	}
 
 	return suburbs
+}
+
+func (s *ShippingImpl) FindAreasBySuburbId(ctx context.Context, suburbId int) *dto.ShipperRes[[]*entity.Area] {
+	key := fmt.Sprintf("suburb_id:%d:areas", suburbId)
+
+	res, err := s.redis.Get(ctx, key).Result()
+	if err != nil {
+		if err != redis.Nil {
+			log.Logger.WithFields(logrus.Fields{"location": "cache.ShippingImpl/FindAreasBySuburbId", "section": "redis.Get"}).Error(err)
+		}
+
+		return nil
+	}
+
+	areas := new(dto.ShipperRes[[]*entity.Area])
+	if err := json.Unmarshal([]byte(res), areas); err != nil {
+
+		log.Logger.WithFields(logrus.Fields{"location": "cache.ShippingImpl/FindAreasBySuburbId", "section": "json.Unmarshal"}).Error(err)
+		return nil
+	}
+
+	return areas
 }

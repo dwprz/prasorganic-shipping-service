@@ -60,3 +60,16 @@ func (s *ShippingImpl) GetSuburbsByCityId(ctx context.Context, cityId int) (*dto
 
 	return res, err
 }
+
+func (s *ShippingImpl) GetAreasBySuburbId(ctx context.Context, suburbId int) (*dto.ShipperRes[[]*entity.Area], error) {
+	if res := s.shippingCache.FindAreasBySuburbId(ctx, suburbId); res != nil {
+		return res, nil
+	}
+
+	res, err := s.restfulClient.Shipper.GetAreasBySuburbId(ctx, suburbId)
+	if err == nil && len(res.Data) > 0 {
+		go s.shippingCache.CacheAreasBySuburbId(context.Background(), suburbId, res)
+	}
+
+	return res, err
+}

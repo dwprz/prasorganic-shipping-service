@@ -38,3 +38,15 @@ type Suburb struct {
 	Province *Province `json:"province,omitempty"`
 	Country  *Country  `json:"country,omitempty"`
 }
+
+type Area struct {
+	Id       int       `json:"id"`
+	Name     string    `json:"name"`
+	Lat      float64   `json:"lat"`
+	Lng      float64   `json:"lng"`
+	Postcode string    `json:"postcode"`
+	Suburb   *Suburb   `json:"suburb,omitempty"`
+	City     *City     `json:"city,omitempty"`
+	Province *Province `json:"province,omitempty"`
+	Country  *Country  `json:"country,omitempty"`
+}
