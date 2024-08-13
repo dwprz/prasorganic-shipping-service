@@ -6,6 +6,7 @@ import (
 	"github.com/dwprz/prasorganic-shipping-service/src/core/restful/client"
 	"github.com/dwprz/prasorganic-shipping-service/src/interface/cache"
 	"github.com/dwprz/prasorganic-shipping-service/src/interface/service"
+	"github.com/dwprz/prasorganic-shipping-service/src/model/dto"
 	"github.com/dwprz/prasorganic-shipping-service/src/model/entity"
 )
 
@@ -21,14 +22,27 @@ func NewShipping(rc *client.Restful, sc cache.Shipping) service.Shipping {
 	}
 }
 
-func (s *ShippingImpl) GetProvinces(ctx context.Context) ([]*entity.Province, error) {
+func (s *ShippingImpl) GetProvinces(ctx context.Context) (*dto.ShipperRes[[]*entity.Province], error) {
 	if res := s.shippingCache.FindProvinces(ctx); res != nil {
 		return res, nil
 	}
 
 	res, err := s.restfulClient.Shipper.GetProvinces(ctx)
-	if err == nil && len(res) > 0 {
+	if err == nil && len(res.Data) > 0 {
 		go s.shippingCache.CacheProvinces(context.Background(), res)
+	}
+
+	return res, err
+}
+
+func (s *ShippingImpl) GetCitiesByProvinceId(ctx context.Context, provinceId int) (*dto.ShipperRes[[]*entity.City], error) {
+	if res := s.shippingCache.FindCitiesByProvinceId(ctx, provinceId); res != nil {
+		return res, nil
+	}
+
+	res, err := s.restfulClient.Shipper.GetCitiesByProvinceId(ctx, provinceId)
+	if err == nil && len(res.Data) > 0 {
+		go s.shippingCache.CacheCitiesByProvinceId(context.Background(), provinceId, res)
 	}
 
 	return res, err

@@ -3,6 +3,7 @@ package delivery
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/dwprz/prasorganic-shipping-service/src/infrastructure/config"
 	"github.com/dwprz/prasorganic-shipping-service/src/interface/delivery"
@@ -17,7 +18,7 @@ func NewShipper() delivery.Shipper {
 	return &ShipperImpl{}
 }
 
-func (s *ShipperImpl) GetProvinces(ctx context.Context) ([]*entity.Province, error) {
+func (s *ShipperImpl) GetProvinces(ctx context.Context) (*dto.ShipperRes[[]*entity.Province], error) {
 	uri := config.Conf.Shipper.BaseUrl + "/v3/location/country/228/provinces?limit=40"
 
 	a := fiber.AcquireAgent()
@@ -36,8 +37,33 @@ func (s *ShipperImpl) GetProvinces(ctx context.Context) ([]*entity.Province, err
 		return nil, errs[0]
 	}
 
-	res := new(dto.ShipperResponse[[]*entity.Province])
+	res := new(dto.ShipperRes[[]*entity.Province])
 	err := json.Unmarshal(body, res)
 
-	return res.Data, err
+	return res, err
+}
+
+func (s *ShipperImpl) GetCitiesByProvinceId(ctx context.Context, provinceId int) (*dto.ShipperRes[[]*entity.City], error) {
+	uri := fmt.Sprintf("%s/v3/location/province/%d/cities?limit=40", config.Conf.Shipper.BaseUrl, provinceId)
+
+	a := fiber.AcquireAgent()
+	defer fiber.ReleaseAgent(a)
+
+	req := a.Request()
+	req.Header.Set("X-API-KEY", config.Conf.Shipper.ApiKey)
+	req.SetRequestURI(uri)
+
+	if err := a.Parse(); err != nil {
+		return nil, err
+	}
+
+	_, body, errs := a.Bytes()
+	if len(errs) > 0 {
+		return nil, errs[0]
+	}
+
+	res := new(dto.ShipperRes[[]*entity.City])
+	err := json.Unmarshal(body, res)
+
+	return res, err
 }

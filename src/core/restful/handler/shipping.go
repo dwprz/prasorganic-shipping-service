@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"strconv"
+
 	"github.com/dwprz/prasorganic-shipping-service/src/interface/service"
 	"github.com/gofiber/fiber/v2"
 )
@@ -21,5 +23,19 @@ func (s *Shipping) GetProvinces(c *fiber.Ctx) error {
 		return err
 	}
 
-	return c.Status(200).JSON(fiber.Map{"data": res})
+	return c.Status(200).JSON(fiber.Map{"data": res.Data, "pagination": res.Pagination})
+}
+
+func (s *Shipping) GetCities(c *fiber.Ctx) error {
+	provinceId, err := strconv.Atoi(c.Query("provinceId"))
+	if err != nil {
+		return err
+	}
+
+	res, err := s.shippingService.GetCitiesByProvinceId(c.Context(), provinceId)
+	if err != nil {
+		return err
+	}
+
+	return c.Status(200).JSON(fiber.Map{"data": res.Data, "pagination": res.Pagination})
 }
