@@ -67,3 +67,28 @@ func (s *ShipperImpl) GetCitiesByProvinceId(ctx context.Context, provinceId int)
 
 	return res, err
 }
+
+func (s *ShipperImpl) GetSuburbsByCityId(ctx context.Context, cityId int) (*dto.ShipperRes[[]*entity.Suburb], error) {
+	uri := fmt.Sprintf("%s/v3/location/city/%d/suburbs?limit=51", config.Conf.Shipper.BaseUrl, cityId)
+
+	a := fiber.AcquireAgent()
+	defer fiber.ReleaseAgent(a)
+
+	req := a.Request()
+	req.Header.Set("X-API-KEY", config.Conf.Shipper.ApiKey)
+	req.SetRequestURI(uri)
+
+	if err := a.Parse(); err != nil {
+		return nil, err
+	}
+
+	_, body, errs := a.Bytes()
+	if len(errs) > 0 {
+		return nil, errs[0]
+	}
+
+	res := new(dto.ShipperRes[[]*entity.Suburb])
+	err := json.Unmarshal(body, res)
+
+	return res, err
+}

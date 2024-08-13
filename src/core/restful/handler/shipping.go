@@ -39,3 +39,17 @@ func (s *Shipping) GetCities(c *fiber.Ctx) error {
 
 	return c.Status(200).JSON(fiber.Map{"data": res.Data, "pagination": res.Pagination})
 }
+
+func (s *Shipping) GetSuburbs(c *fiber.Ctx) error {
+	cityId, err := strconv.Atoi(c.Query("cityId"))
+	if err != nil {
+		return err
+	}
+
+	res, err := s.shippingService.GetSuburbsByCityId(c.Context(), cityId)
+	if err != nil {
+		return err
+	}
+
+	return c.Status(200).JSON(fiber.Map{"data": res.Data, "pagination": res.Pagination})
+}

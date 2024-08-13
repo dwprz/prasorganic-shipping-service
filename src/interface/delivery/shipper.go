@@ -10,4 +10,5 @@ import (
 type Shipper interface {
 	GetProvinces(ctx context.Context) (*dto.ShipperRes[[]*entity.Province], error)
 	GetCitiesByProvinceId(ctx context.Context, provinceId int) (*dto.ShipperRes[[]*entity.City], error)
+	GetSuburbsByCityId(ctx context.Context, cityId int) (*dto.ShipperRes[[]*entity.Suburb], error)
 }

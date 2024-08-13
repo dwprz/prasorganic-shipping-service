@@ -47,3 +47,16 @@ func (s *ShippingImpl) GetCitiesByProvinceId(ctx context.Context, provinceId int
 
 	return res, err
 }
+
+func (s *ShippingImpl) GetSuburbsByCityId(ctx context.Context, cityId int) (*dto.ShipperRes[[]*entity.Suburb], error) {
+	if res := s.shippingCache.FindSuburbsByCityId(ctx, cityId); res != nil {
+		return res, nil
+	}
+
+	res, err := s.restfulClient.Shipper.GetSuburbsByCityId(ctx, cityId)
+	if err == nil && len(res.Data) > 0 {
+		go s.shippingCache.CacheSuburbsByCityId(context.Background(), cityId, res)
+	}
+
+	return res, err
+}

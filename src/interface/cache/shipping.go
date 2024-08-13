@@ -10,6 +10,8 @@ import (
 type Shipping interface {
 	CacheProvinces(ctx context.Context, p *dto.ShipperRes[[]*entity.Province])
 	CacheCitiesByProvinceId(ctx context.Context, provinceId int, p *dto.ShipperRes[[]*entity.City])
+	CacheSuburbsByCityId(ctx context.Context, cityId int, p *dto.ShipperRes[[]*entity.Suburb])
 	FindProvinces(ctx context.Context) *dto.ShipperRes[[]*entity.Province]
 	FindCitiesByProvinceId(ctx context.Context, provinceId int) *dto.ShipperRes[[]*entity.City]
+	FindSuburbsByCityId(ctx context.Context, cityId int) *dto.ShipperRes[[]*entity.Suburb]
 }
