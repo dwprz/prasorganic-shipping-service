@@ -1,0 +1,155 @@
+services:
+  prasorganic-shipping-service-redis-node-1:
+    container_name: prasorganic-shipping-service-redis-node-1
+    image: redis:7.2.2
+    ports:
+      - 5381:6379
+      - 15381:16379
+    volumes:
+      - type: bind
+        source: ./doc/database/redis/redis-node-1.conf
+        target: /usr/local/etc/redis/redis.conf
+      - type: volume
+        source: prasorganic-shipping-service-redis-data-node-1
+        target: /data
+    networks:
+      prasorganic-shipping-service-redis-network:
+        ipv4_address: 182.48.0.11
+      prasorganic-shipping-service-network:
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    restart: on-failure
+  prasorganic-shipping-service-redis-node-2:
+    container_name: prasorganic-shipping-service-redis-node-2
+    image: redis:7.2.2
+    ports:
+      - 5382:6379
+      - 15382:16379
+    volumes:
+      - type: bind
+        source: ./doc/database/redis/redis-node-2.conf
+        target: /usr/local/etc/redis/redis.conf
+      - type: volume
+        source: prasorganic-shipping-service-redis-data-node-2
+        target: /data
+    networks:
+      prasorganic-shipping-service-redis-network:
+        ipv4_address: 182.48.0.12
+      prasorganic-shipping-service-network:
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    restart: on-failure
+  
+  prasorganic-shipping-service-redis-node-3:
+    container_name: prasorganic-shipping-service-redis-node-3
+    image: redis:7.2.2
+    ports:
+      - 5383:6379
+      - 15383:16379
+    volumes:
+      - type: bind
+        source: ./doc/database/redis/redis-node-3.conf
+        target: /usr/local/etc/redis/redis.conf
+      - type: volume
+        source: prasorganic-shipping-service-redis-data-node-3
+        target: /data
+    networks:
+      prasorganic-shipping-service-redis-network:
+        ipv4_address: 182.48.0.13
+      prasorganic-shipping-service-network:
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    restart: on-failure
+  
+  prasorganic-shipping-service-redis-node-4:
+    container_name: prasorganic-shipping-service-redis-node-4
+    image: redis:7.2.2
+    ports:
+      - 5384:6379
+      - 15384:16379
+    volumes:
+      - type: bind
+        source: ./doc/database/redis/redis-node-4.conf
+        target: /usr/local/etc/redis/redis.conf
+      - type: volume
+        source: prasorganic-shipping-service-redis-data-node-4
+        target: /data
+    networks:
+      prasorganic-shipping-service-redis-network:
+        ipv4_address: 182.48.0.14
+      prasorganic-shipping-service-network:
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    restart: on-failure
+  
+  prasorganic-shipping-service-redis-node-5:
+    container_name: prasorganic-shipping-service-redis-node-5
+    image: redis:7.2.2
+    ports:
+      - 5385:6379
+      - 15385:16379
+    volumes:
+      - type: bind
+        source: ./doc/database/redis/redis-node-5.conf
+        target: /usr/local/etc/redis/redis.conf
+      - type: volume
+        source: prasorganic-shipping-service-redis-data-node-5
+        target: /data
+    networks:
+      prasorganic-shipping-service-redis-network:
+        ipv4_address: 182.48.0.15
+      prasorganic-shipping-service-network:
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    restart: on-failure
+
+  prasorganic-shipping-service-redis-node-6:
+    container_name: prasorganic-shipping-service-redis-node-6
+    image: redis:7.2.2
+    ports:
+      - 5386:6379
+      - 15386:16379
+    volumes:
+      - type: bind
+        source: ./doc/database/redis/redis-node-6.conf
+        target: /usr/local/etc/redis/redis.conf
+      - type: volume
+        source: prasorganic-shipping-service-redis-data-node-6
+        target: /data
+    networks:
+      prasorganic-shipping-service-redis-network:
+        ipv4_address: 182.48.0.16
+      prasorganic-shipping-service-network:
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    restart: on-failure  
+  
+  prasorganic-shipping-service-redisinsight:
+    container_name: prasorganic-shipping-service-redisinsight
+    image: redislabs/redisinsight:2.50
+    ports:
+      - 5543:5540
+    networks:
+      - prasorganic-shipping-service-redis-network
+
+volumes:
+  prasorganic-shipping-service-redis-data-node-1:
+    name: prasorganic-shipping-service-redis-data-node-1
+  prasorganic-shipping-service-redis-data-node-2:
+    name: prasorganic-shipping-service-redis-data-node-2
+  prasorganic-shipping-service-redis-data-node-3:
+    name: prasorganic-shipping-service-redis-data-node-3
+  prasorganic-shipping-service-redis-data-node-4:
+    name: prasorganic-shipping-service-redis-data-node-4
+  prasorganic-shipping-service-redis-data-node-5:
+    name: prasorganic-shipping-service-redis-data-node-5
+  prasorganic-shipping-service-redis-data-node-6:
+    name: prasorganic-shipping-service-redis-data-node-6
+
+networks:
+  prasorganic-shipping-service-network:
+    name: prasorganic-shipping-service-network
+    driver: bridge
+  prasorganic-shipping-service-redis-network:
+    name: prasorganic-shipping-service-redis-network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 182.48.0.0/16
+  prasorganic-network:
+    name: prasorganic-network
+    external: true

@@ -1,0 +1,35 @@
+package service
+
+import (
+	"context"
+
+	"github.com/dwprz/prasorganic-shipping-service/src/core/restful/client"
+	"github.com/dwprz/prasorganic-shipping-service/src/interface/cache"
+	"github.com/dwprz/prasorganic-shipping-service/src/interface/service"
+	"github.com/dwprz/prasorganic-shipping-service/src/model/entity"
+)
+
+type ShippingImpl struct {
+	restfulClient *client.Restful
+	shippingCache cache.Shipping
+}
+
+func NewShipping(rc *client.Restful, sc cache.Shipping) service.Shipping {
+	return &ShippingImpl{
+		restfulClient: rc,
+		shippingCache: sc,
+	}
+}
+
+func (s *ShippingImpl) GetProvinces(ctx context.Context) ([]*entity.Province, error) {
+	if res := s.shippingCache.FindProvinces(ctx); res != nil {
+		return res, nil
+	}
+
+	res, err := s.restfulClient.Shipper.GetProvinces(ctx)
+	if err == nil && len(res) > 0 {
+		go s.shippingCache.CacheProvinces(context.Background(), res)
+	}
+
+	return res, err
+}
