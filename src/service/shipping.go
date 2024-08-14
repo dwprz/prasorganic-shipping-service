@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/dwprz/prasorganic-shipping-service/src/core/restful/client"
+	v "github.com/dwprz/prasorganic-shipping-service/src/infrastructure/validator"
 	"github.com/dwprz/prasorganic-shipping-service/src/interface/cache"
 	"github.com/dwprz/prasorganic-shipping-service/src/interface/service"
 	"github.com/dwprz/prasorganic-shipping-service/src/model/dto"
@@ -20,6 +21,15 @@ func NewShipping(rc *client.Restful, sc cache.Shipping) service.Shipping {
 		restfulClient: rc,
 		shippingCache: sc,
 	}
+}
+
+func (s *ShippingImpl) Pricing(ctx context.Context, data *dto.PricingReq) (*dto.ShipperRes[*entity.Pricing], error) {
+	if err := v.Validate.Struct(data); err != nil {
+		return nil, err
+	}
+
+	res, err := s.restfulClient.Shipper.Pricing(ctx, data)
+	return res, err
 }
 
 func (s *ShippingImpl) GetProvinces(ctx context.Context) (*dto.ShipperRes[[]*entity.Province], error) {

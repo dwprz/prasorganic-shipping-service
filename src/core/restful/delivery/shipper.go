@@ -18,6 +18,35 @@ func NewShipper() delivery.Shipper {
 	return &ShipperImpl{}
 }
 
+func (s *ShipperImpl) Pricing(ctx context.Context, data *dto.PricingReq) (*dto.ShipperRes[*entity.Pricing], error) {
+	uri := config.Conf.Shipper.BaseUrl + "/v3/pricing/domestic"
+
+	a := fiber.AcquireAgent()
+	defer fiber.ReleaseAgent(a)
+	
+	a.JSON(data)
+
+	req := a.Request()
+	req.Header.SetContentType("application/json")
+	req.Header.Set("X-API-KEY", config.Conf.Shipper.ApiKey)
+	req.Header.SetMethod("POST")
+	req.SetRequestURI(uri)
+
+	if err := a.Parse(); err != nil {
+		return nil, err
+	}
+
+	code, body, _ := a.Bytes()
+	if code != 200 {
+		return nil, fmt.Errorf(string(body))
+	}
+
+	res := new(dto.ShipperRes[*entity.Pricing])
+	err := json.Unmarshal(body, res)
+
+	return res, err
+}
+
 func (s *ShipperImpl) GetProvinces(ctx context.Context) (*dto.ShipperRes[[]*entity.Province], error) {
 	uri := config.Conf.Shipper.BaseUrl + "/v3/location/country/228/provinces?limit=40"
 
@@ -26,15 +55,16 @@ func (s *ShipperImpl) GetProvinces(ctx context.Context) (*dto.ShipperRes[[]*enti
 
 	req := a.Request()
 	req.Header.Set("X-API-KEY", config.Conf.Shipper.ApiKey)
+	req.Header.SetMethod("GET")
 	req.SetRequestURI(uri)
 
 	if err := a.Parse(); err != nil {
 		return nil, err
 	}
 
-	_, body, errs := a.Bytes()
-	if len(errs) > 0 {
-		return nil, errs[0]
+	code, body, _ := a.Bytes()
+	if code != 200 {
+		return nil, fmt.Errorf(string(body))
 	}
 
 	res := new(dto.ShipperRes[[]*entity.Province])
@@ -51,15 +81,16 @@ func (s *ShipperImpl) GetCitiesByProvinceId(ctx context.Context, provinceId int)
 
 	req := a.Request()
 	req.Header.Set("X-API-KEY", config.Conf.Shipper.ApiKey)
+	req.Header.SetMethod("GET")
 	req.SetRequestURI(uri)
 
 	if err := a.Parse(); err != nil {
 		return nil, err
 	}
 
-	_, body, errs := a.Bytes()
-	if len(errs) > 0 {
-		return nil, errs[0]
+	code, body, _ := a.Bytes()
+	if code != 200 {
+		return nil, fmt.Errorf(string(body))
 	}
 
 	res := new(dto.ShipperRes[[]*entity.City])
@@ -76,15 +107,16 @@ func (s *ShipperImpl) GetSuburbsByCityId(ctx context.Context, cityId int) (*dto.
 
 	req := a.Request()
 	req.Header.Set("X-API-KEY", config.Conf.Shipper.ApiKey)
+	req.Header.SetMethod("GET")
 	req.SetRequestURI(uri)
 
 	if err := a.Parse(); err != nil {
 		return nil, err
 	}
 
-	_, body, errs := a.Bytes()
-	if len(errs) > 0 {
-		return nil, errs[0]
+	code, body, _ := a.Bytes()
+	if code != 200 {
+		return nil, fmt.Errorf(string(body))
 	}
 
 	res := new(dto.ShipperRes[[]*entity.Suburb])
@@ -101,15 +133,16 @@ func (s *ShipperImpl) GetAreasBySuburbId(ctx context.Context, suburbId int) (*dt
 
 	req := a.Request()
 	req.Header.Set("X-API-KEY", config.Conf.Shipper.ApiKey)
+	req.Header.SetMethod("GET")
 	req.SetRequestURI(uri)
 
 	if err := a.Parse(); err != nil {
 		return nil, err
 	}
 
-	_, body, errs := a.Bytes()
-	if len(errs) > 0 {
-		return nil, errs[0]
+	code, body, _ := a.Bytes()
+	if code != 200 {
+		return nil, fmt.Errorf(string(body))
 	}
 
 	res := new(dto.ShipperRes[[]*entity.Area])

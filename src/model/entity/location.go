@@ -1,11 +1,5 @@
 package entity
 
-type Pagination struct {
-	CurrentPage   int `json:"current_page"`
-	TotalPages    int `json:"total_pages"`
-	TotalElements int `json:"total_elements"`
-}
-
 type Country struct {
 	Id   int    `json:"id"`
 	Name string `json:"name"`
@@ -49,4 +43,19 @@ type Area struct {
 	City     *City     `json:"city,omitempty"`
 	Province *Province `json:"province,omitempty"`
 	Country  *Country  `json:"country,omitempty"`
+}
+
+type Location struct {
+	AreaId       int     `json:"area_id"`
+	AreaName     string  `json:"area_name"`
+	SuburbId     int     `json:"suburb_id"`
+	SuburbName   string  `json:"suburb_name"`
+	CityId       int     `json:"city_id"`
+	CityName     string  `json:"city_name"`
+	ProvinceId   int     `json:"province_id"`
+	ProvinceName string  `json:"province_name"`
+	CountryId    int     `json:"country_id"`
+	CountryName  string  `json:"country_name"`
+	Lat          float64 `json:"lat"`
+	Lng          float64 `json:"lng"`
 }

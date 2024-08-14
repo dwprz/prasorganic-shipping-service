@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/dwprz/prasorganic-shipping-service/src/interface/service"
+	"github.com/dwprz/prasorganic-shipping-service/src/model/dto"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -61,6 +62,20 @@ func (s *Shipping) GetAreas(c *fiber.Ctx) error {
 	}
 
 	res, err := s.shippingService.GetAreasBySuburbId(c.Context(), cityId)
+	if err != nil {
+		return err
+	}
+
+	return c.Status(200).JSON(fiber.Map{"data": res.Data, "pagination": res.Pagination})
+}
+
+func (s *Shipping) Pricing(c *fiber.Ctx) error {
+	req := new(dto.PricingReq)
+	if err := c.BodyParser(req); err != nil {
+		return err
+	}
+
+	res, err := s.shippingService.Pricing(c.Context(), req)
 	if err != nil {
 		return err
 	}

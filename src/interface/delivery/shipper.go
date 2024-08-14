@@ -8,6 +8,7 @@ import (
 )
 
 type Shipper interface {
+	Pricing(ctx context.Context, data *dto.PricingReq) (*dto.ShipperRes[*entity.Pricing], error) 
 	GetProvinces(ctx context.Context) (*dto.ShipperRes[[]*entity.Province], error)
 	GetCitiesByProvinceId(ctx context.Context, provinceId int) (*dto.ShipperRes[[]*entity.City], error)
 	GetSuburbsByCityId(ctx context.Context, cityId int) (*dto.ShipperRes[[]*entity.Suburb], error)
