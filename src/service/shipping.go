@@ -3,7 +3,9 @@ package service
 import (
 	"context"
 
-	"github.com/dwprz/prasorganic-shipping-service/src/core/restful/client"
+	pb "github.com/dwprz/prasorganic-proto/protogen/order"
+	grpcclient "github.com/dwprz/prasorganic-shipping-service/src/core/grpc/client"
+	resfulclient "github.com/dwprz/prasorganic-shipping-service/src/core/restful/client"
 	v "github.com/dwprz/prasorganic-shipping-service/src/infrastructure/validator"
 	"github.com/dwprz/prasorganic-shipping-service/src/interface/cache"
 	"github.com/dwprz/prasorganic-shipping-service/src/interface/service"
@@ -12,15 +14,43 @@ import (
 )
 
 type ShippingImpl struct {
-	restfulClient *client.Restful
+	restfulClient *resfulclient.Restful
+	grpcClient    *grpcclient.Grpc
 	shippingCache cache.Shipping
 }
 
-func NewShipping(rc *client.Restful, sc cache.Shipping) service.Shipping {
+func NewShipping(rc *resfulclient.Restful, gc *grpcclient.Grpc, sc cache.Shipping) service.Shipping {
 	return &ShippingImpl{
 		restfulClient: rc,
+		grpcClient:    gc,
 		shippingCache: sc,
 	}
+}
+
+func (s *ShippingImpl) ShippingOrder(ctx context.Context, data *entity.ShippingOrder) error {
+	if err := v.Validate.Struct(data); err != nil {
+		return err
+	}
+
+	orderId := data.ExternalId
+
+	shippingId, err := s.restfulClient.Shipper.ShippingOrder(ctx, data)
+	if err != nil {
+		return err
+	}
+
+	err = s.grpcClient.Order.AddShippingId(ctx, &pb.AddShippingIdReq{
+		OrderId:    orderId,
+		ShippingId: shippingId,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	err = s.restfulClient.Shipper.RequestPickup(ctx, []string{shippingId})
+
+	return err
 }
 
 func (s *ShippingImpl) Pricing(ctx context.Context, data *dto.PricingReq) (*dto.ShipperRes[*entity.Pricing], error) {

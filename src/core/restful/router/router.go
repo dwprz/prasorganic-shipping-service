@@ -7,6 +7,9 @@ import (
 )
 
 func Create(app *fiber.App, h *handler.Shipping, m *middleware.Middleware) {
+	// admin & super admin
+	app.Add("POST", "/api/shippings/orders", m.VerifyJwt, m.VerifyAdmin, h.ManualShipping)
+
 	// all
 	app.Add("POST", "/api/shippings/pricings", m.VerifyJwt, h.Pricing)
 	app.Add("GET", "/api/shippings/provinces", m.VerifyJwt, h.GetProvinces)

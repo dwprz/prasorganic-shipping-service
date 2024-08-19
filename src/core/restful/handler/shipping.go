@@ -5,6 +5,7 @@ import (
 
 	"github.com/dwprz/prasorganic-shipping-service/src/interface/service"
 	"github.com/dwprz/prasorganic-shipping-service/src/model/dto"
+	"github.com/dwprz/prasorganic-shipping-service/src/model/entity"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -16,6 +17,20 @@ func NewShipping(ss service.Shipping) *Shipping {
 	return &Shipping{
 		shippingService: ss,
 	}
+}
+
+func (s *Shipping) ManualShipping(c *fiber.Ctx) error {
+	req := new(entity.ShippingOrder)
+	if err := c.BodyParser(req); err != nil {
+		return err
+	}
+
+	err := s.shippingService.ShippingOrder(c.Context(), req)
+	if err != nil {
+		return err
+	}
+
+	return c.Status(201).JSON(fiber.Map{"data": "order shipped successfully"})
 }
 
 func (s *Shipping) GetProvinces(c *fiber.Ctx) error {

@@ -6,6 +6,7 @@ import (
 	"syscall"
 
 	"github.com/dwprz/prasorganic-shipping-service/src/cache"
+	"github.com/dwprz/prasorganic-shipping-service/src/core/grpc"
 	"github.com/dwprz/prasorganic-shipping-service/src/core/restful"
 	"github.com/dwprz/prasorganic-shipping-service/src/infrastructure/database"
 	"github.com/dwprz/prasorganic-shipping-service/src/service"
@@ -28,8 +29,10 @@ func main() {
 	redisDB := database.NewRedisCluster()
 	shippingCache := cache.NewShipping(redisDB)
 
+	grpcClient := grpc.InitClient()
+
 	restfulClient := restful.InitClient()
-	shippingService := service.NewShipping(restfulClient, shippingCache)
+	shippingService := service.NewShipping(restfulClient, grpcClient, shippingCache)
 
 	restfulServer := restful.InitServer(shippingService)
 	defer restfulServer.Stop()
