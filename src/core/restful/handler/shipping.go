@@ -33,6 +33,17 @@ func (s *Shipping) ManualShipping(c *fiber.Ctx) error {
 	return c.Status(201).JSON(fiber.Map{"data": "order shipped successfully"})
 }
 
+func (s *Shipping) Tracking(c *fiber.Ctx) error {
+	shippingId := c.Params("shippingId")
+
+	res, err := s.shippingService.TrackingByShippingId(c.Context(), shippingId)
+	if err != nil {
+		return err
+	}
+
+	return c.Status(200).JSON(fiber.Map{"data": res})
+}
+
 func (s *Shipping) GetProvinces(c *fiber.Ctx) error {
 	res, err := s.shippingService.GetProvinces(c.Context())
 	if err != nil {

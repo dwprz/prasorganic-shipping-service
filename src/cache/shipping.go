@@ -24,6 +24,20 @@ func NewShipping(r *redis.ClusterClient) cache.Shipping {
 	}
 }
 
+func (s *ShippingImpl) CacheTrackingByShippingId(ctx context.Context, shippingId string, t *dto.ShipperRes[[]*entity.Tracking]) {
+	b, err := json.Marshal(t)
+	if err != nil {
+		log.Logger.WithFields(logrus.Fields{"location": "cache.ShippingImpl/CacheTrackingByShippingId", "section": "json.Marshal"}).Error(err)
+		return
+	}
+
+	key := fmt.Sprintf("shipping_id:%s:trackings", shippingId)
+
+	if _, err := s.redis.SetEx(ctx, key, string(b), 2*time.Hour).Result(); err != nil {
+		log.Logger.WithFields(logrus.Fields{"location": "cache.ShippingImpl/CacheTrackingByShippingId", "section": "redis.SetEx"}).Error(err)
+	}
+}
+
 func (s *ShippingImpl) CacheProvinces(ctx context.Context, p *dto.ShipperRes[[]*entity.Province]) {
 	b, err := json.Marshal(p)
 	if err != nil {
@@ -74,6 +88,28 @@ func (s *ShippingImpl) CacheAreasBySuburbId(ctx context.Context, suburbId int, p
 	if _, err := s.redis.SetEx(ctx, key, string(b), 24*time.Hour).Result(); err != nil {
 		log.Logger.WithFields(logrus.Fields{"location": "cache.ShippingImpl/CacheAreasBySuburbId", "section": "redis.SetEx"}).Error(err)
 	}
+}
+
+func (s *ShippingImpl) FindTrackingByShippingId(ctx context.Context, shippingId string) *dto.ShipperRes[[]*entity.Tracking] {
+	key := fmt.Sprintf("shipping_id:%s:trackings", shippingId)
+
+	res, err := s.redis.Get(ctx, key).Result()
+	if err != nil {
+		if err != redis.Nil {
+			log.Logger.WithFields(logrus.Fields{"location": "cache.ShippingImpl/FindTrackingByShippingId", "section": "redis.Get"}).Error(err)
+		}
+
+		return nil
+	}
+
+	tracking := new(dto.ShipperRes[[]*entity.Tracking])
+	if err := json.Unmarshal([]byte(res), tracking); err != nil {
+
+		log.Logger.WithFields(logrus.Fields{"location": "cache.ShippingImpl/FindTrackingByShippingId", "section": "json.Unmarshal"}).Error(err)
+		return nil
+	}
+
+	return tracking
 }
 
 func (s *ShippingImpl) FindProvinces(ctx context.Context) *dto.ShipperRes[[]*entity.Province] {

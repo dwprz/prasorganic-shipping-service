@@ -62,6 +62,19 @@ func (s *ShippingImpl) Pricing(ctx context.Context, data *dto.PricingReq) (*dto.
 	return res, err
 }
 
+func (s *ShippingImpl) TrackingByShippingId(ctx context.Context, shippingId string) (*dto.ShipperRes[[]*entity.Tracking], error) {
+	if res := s.shippingCache.FindTrackingByShippingId(ctx, shippingId); res != nil {
+		return res, nil
+	}
+
+	res, err := s.restfulClient.Shipper.TrackingByShippingId(ctx, shippingId)
+	if err == nil && len(res.Data) > 0 {
+		go s.shippingCache.CacheTrackingByShippingId(context.Background(), shippingId, res)
+	}
+
+	return res, err
+}
+
 func (s *ShippingImpl) GetProvinces(ctx context.Context) (*dto.ShipperRes[[]*entity.Province], error) {
 	if res := s.shippingCache.FindProvinces(ctx); res != nil {
 		return res, nil

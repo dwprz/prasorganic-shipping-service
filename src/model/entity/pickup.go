@@ -1,10 +1,10 @@
 package entity
 
 type Pickup struct {
-	Data Data `json:"data"`
+	Data PickupData `json:"data"`
 }
 
-type Data struct {
+type PickupData struct {
 	OrderActivation OrderActivation `json:"order_activation"`
 }
 

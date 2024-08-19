@@ -140,6 +140,45 @@ func (s *ShipperImpl) Pricing(ctx context.Context, data *dto.PricingReq) (*dto.S
 	return shipperRes, err
 }
 
+func (s *ShipperImpl) TrackingByShippingId(ctx context.Context, shippingId string) (*dto.ShipperRes[[]*entity.Tracking], error) {
+	res, err := cbreaker.Shipper.Execute(func() (any, error) {
+		uri := fmt.Sprintf("%s/v3/order/%s", config.Conf.Shipper.BaseUrl, shippingId)
+		a := fiber.AcquireAgent()
+		defer fiber.ReleaseAgent(a)
+
+		req := a.Request()
+		req.Header.SetContentType("application/json")
+		req.Header.Set("X-API-KEY", config.Conf.Shipper.ApiKey)
+		req.Header.SetMethod("GET")
+		req.SetRequestURI(uri)
+
+		if err := a.Parse(); err != nil {
+			return nil, err
+		}
+
+		code, body, _ := a.Bytes()
+		if code != 200 {
+			return nil, &errors.Response{HttpCode: code, Message: string(body)}
+		}
+
+		res := new(dto.ShipperRes[[]*entity.Tracking])
+		err := json.Unmarshal(body, res)
+
+		return res, err
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	shipperRes, ok := res.(*dto.ShipperRes[[]*entity.Tracking])
+	if !ok {
+		return nil, fmt.Errorf("unexpected type %T expected *dto.ShipperRes[[]*entity.Tracking]", res)
+	}
+
+	return shipperRes, err
+}
+
 func (s *ShipperImpl) GetProvinces(ctx context.Context) (*dto.ShipperRes[[]*entity.Province], error) {
 	res, err := cbreaker.Shipper.Execute(func() (any, error) {
 		uri := config.Conf.Shipper.BaseUrl + "/v3/location/country/228/provinces?limit=40"
