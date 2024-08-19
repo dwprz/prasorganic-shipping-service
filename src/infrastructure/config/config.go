@@ -42,12 +42,19 @@ type redis struct {
 	Password  string
 }
 
+type kafka struct {
+	Addr1 string
+	Addr2 string
+	Addr3 string
+}
+
 type Config struct {
 	CurrentApp *currentApp
 	ApiGateway *apiGateway
 	Shipper    *shipper
 	Jwt        *jwt
 	Redis      *redis
+	Kafka      *kafka
 }
 
 var Conf *Config

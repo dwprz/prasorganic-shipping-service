@@ -44,6 +44,11 @@ func setUpForNonDevelopment(appStatus string) *Config {
 		log.Logger.WithFields(logrus.Fields{"location": "config.setUpForNonDevelopment", "section": "KVv2.Get"}).Fatal(err)
 	}
 
+	kafkaSecrets, err := client.KVv2(mountPath).Get(context.Background(), "kafka")
+	if err != nil {
+		log.Logger.WithFields(logrus.Fields{"location": "config.setUpForNonDevelopment", "section": "KVv2.Get"}).Fatal(err)
+	}
+
 	currentAppConf := new(currentApp)
 	currentAppConf.RestfulAddress = shippingServiceSecrets.Data["RESTFUL_ADDRESS"].(string)
 	currentAppConf.GrpcPort = shippingServiceSecrets.Data["GRPC_PORT"].(string)
@@ -86,11 +91,17 @@ func setUpForNonDevelopment(appStatus string) *Config {
 	redisConf.AddrNode6 = shippingServiceSecrets.Data["REDIS_ADDR_NODE_6"].(string)
 	redisConf.Password = shippingServiceSecrets.Data["REDIS_PASSWORD"].(string)
 
+	kafkaConf := new(kafka)
+	kafkaConf.Addr1 = kafkaSecrets.Data["ADDRESS_1"].(string)
+	kafkaConf.Addr2 = kafkaSecrets.Data["ADDRESS_2"].(string)
+	kafkaConf.Addr3 = kafkaSecrets.Data["ADDRESS_3"].(string)
+
 	return &Config{
 		CurrentApp: currentAppConf,
 		ApiGateway: apiGatewayConf,
 		Shipper:    shipperConf,
 		Jwt:        jwtConf,
 		Redis:      redisConf,
+		Kafka:      kafkaConf,
 	}
 }

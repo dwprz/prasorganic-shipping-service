@@ -46,3 +46,12 @@ func (o *OrderGrpcImpl) AddShippingId(ctx context.Context, data *pb.AddShippingI
 
 	return err
 }
+
+func (o *OrderGrpcImpl) UpdateStatus(ctx context.Context, data *pb.UpdateStatusReq) error {
+	_, err := cbreaker.OrderGrpc.Execute(func() (any, error) {
+		_, err := o.client.UpdateStatus(ctx, data)
+		return nil, err
+	})
+
+	return err
+}

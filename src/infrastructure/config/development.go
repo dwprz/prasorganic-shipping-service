@@ -50,11 +50,17 @@ func setUpForDevelopment() *Config {
 	redisConf.AddrNode6 = viper.GetString("REDIS_ADDR_NODE_6")
 	redisConf.Password = viper.GetString("REDIS_PASSWORD")
 
+	kafkaConf := new(kafka)
+	kafkaConf.Addr1 = viper.GetString("KAFKA_ADDRESS_1")
+	kafkaConf.Addr2 = viper.GetString("KAFKA_ADDRESS_2")
+	kafkaConf.Addr3 = viper.GetString("KAFKA_ADDRESS_3")
+
 	return &Config{
 		CurrentApp: currentAppConf,
 		ApiGateway: apiGatewayConf,
 		Shipper:    shipperConf,
 		Jwt:        jwtConf,
 		Redis:      redisConf,
+		Kafka:      kafkaConf,
 	}
 }

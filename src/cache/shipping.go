@@ -24,7 +24,7 @@ func NewShipping(r *redis.ClusterClient) cache.Shipping {
 	}
 }
 
-func (s *ShippingImpl) CacheTrackingByShippingId(ctx context.Context, shippingId string, t *dto.ShipperRes[[]*entity.Tracking]) {
+func (s *ShippingImpl) CacheTrackingByShippingId(ctx context.Context, shippingId string, t *entity.Tracking) {
 	b, err := json.Marshal(t)
 	if err != nil {
 		log.Logger.WithFields(logrus.Fields{"location": "cache.ShippingImpl/CacheTrackingByShippingId", "section": "json.Marshal"}).Error(err)
@@ -90,7 +90,7 @@ func (s *ShippingImpl) CacheAreasBySuburbId(ctx context.Context, suburbId int, p
 	}
 }
 
-func (s *ShippingImpl) FindTrackingByShippingId(ctx context.Context, shippingId string) *dto.ShipperRes[[]*entity.Tracking] {
+func (s *ShippingImpl) FindTrackingByShippingId(ctx context.Context, shippingId string) *entity.Tracking {
 	key := fmt.Sprintf("shipping_id:%s:trackings", shippingId)
 
 	res, err := s.redis.Get(ctx, key).Result()
@@ -102,7 +102,7 @@ func (s *ShippingImpl) FindTrackingByShippingId(ctx context.Context, shippingId 
 		return nil
 	}
 
-	tracking := new(dto.ShipperRes[[]*entity.Tracking])
+	tracking := new(entity.Tracking)
 	if err := json.Unmarshal([]byte(res), tracking); err != nil {
 
 		log.Logger.WithFields(logrus.Fields{"location": "cache.ShippingImpl/FindTrackingByShippingId", "section": "json.Unmarshal"}).Error(err)
@@ -196,4 +196,16 @@ func (s *ShippingImpl) FindAreasBySuburbId(ctx context.Context, suburbId int) *d
 	}
 
 	return areas
+}
+
+func (s *ShippingImpl) UpdateTracking(ctx context.Context, shippingId string, data *entity.TrackingData) {
+	if res := s.FindTrackingByShippingId(ctx, shippingId); res != nil {
+		res.Trackings = append(res.Trackings, data)
+
+		return
+	}
+
+	s.CacheTrackingByShippingId(ctx, shippingId, &entity.Tracking{
+		Trackings: []*entity.TrackingData{data},
+	})
 }

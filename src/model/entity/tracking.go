@@ -5,7 +5,7 @@ import (
 )
 
 type Tracking struct {
-	Trackings []TrackingData `json:"trackings"`
+	Trackings []*TrackingData `json:"trackings"`
 }
 
 type TrackingData struct {

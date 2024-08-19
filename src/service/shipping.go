@@ -71,13 +71,13 @@ func (s *ShippingImpl) CreateLabel(ctx context.Context, data *dto.CreateLabelReq
 	return res, err
 }
 
-func (s *ShippingImpl) TrackingByShippingId(ctx context.Context, shippingId string) (*dto.ShipperRes[[]*entity.Tracking], error) {
+func (s *ShippingImpl) TrackingByShippingId(ctx context.Context, shippingId string) (*entity.Tracking, error) {
 	if res := s.shippingCache.FindTrackingByShippingId(ctx, shippingId); res != nil {
 		return res, nil
 	}
 
 	res, err := s.restfulClient.Shipper.TrackingByShippingId(ctx, shippingId)
-	if err == nil && len(res.Data) > 0 {
+	if err == nil && len(res.Trackings) > 0 {
 		go s.shippingCache.CacheTrackingByShippingId(context.Background(), shippingId, res)
 	}
 

@@ -9,4 +9,5 @@ import (
 
 type OrderGrpc interface {
 	AddShippingId(ctx context.Context, data *pb.AddShippingIdReq) error
+	UpdateStatus(ctx context.Context, data *pb.UpdateStatusReq) error 
 }
