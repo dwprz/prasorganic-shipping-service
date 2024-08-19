@@ -33,6 +33,21 @@ func (s *Shipping) ManualShipping(c *fiber.Ctx) error {
 	return c.Status(201).JSON(fiber.Map{"data": "order shipped successfully"})
 }
 
+func (s *Shipping) CreateLabel(c *fiber.Ctx) error {
+	req := new(dto.CreateLabelReq)
+	if err := c.BodyParser(req); err != nil {
+		return err
+	}
+
+	res, err := s.shippingService.CreateLabel(c.Context(), req)
+	if err != nil {
+		return err
+	}
+
+	return c.Status(201).JSON(fiber.Map{"data": res})
+}
+
+
 func (s *Shipping) Tracking(c *fiber.Ctx) error {
 	shippingId := c.Params("shippingId")
 

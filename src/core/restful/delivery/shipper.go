@@ -140,6 +140,49 @@ func (s *ShipperImpl) Pricing(ctx context.Context, data *dto.PricingReq) (*dto.S
 	return shipperRes, err
 }
 
+func (s *ShipperImpl) CreateLabel(ctx context.Context, data *dto.CreateLabelReq) (*dto.ShipperRes[*entity.Label], error) {
+	res, err := cbreaker.Shipper.Execute(func() (any, error) {
+		uri := config.Conf.Shipper.BaseUrl + "/v3/order/label"
+
+		a := fiber.AcquireAgent()
+		defer fiber.ReleaseAgent(a)
+
+		a.JSON(data)
+
+		req := a.Request()
+		req.Header.SetContentType("application/json")
+		req.Header.Set("X-API-KEY", config.Conf.Shipper.ApiKey)
+		req.Header.SetMethod("POST")
+		req.SetRequestURI(uri)
+
+		if err := a.Parse(); err != nil {
+			return nil, err
+		}
+
+		code, body, _ := a.Bytes()
+		if code != 201 {
+			return nil, &errors.Response{HttpCode: code, Message: string(body)}
+		}
+
+		res := new(dto.ShipperRes[*entity.Label])
+		err := json.Unmarshal(body, res)
+
+		return res, err
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	shipperRes, ok := res.(*dto.ShipperRes[*entity.Label])
+	if !ok {
+		return nil, fmt.Errorf("unexpected type %T expected *dto.ShipperRes[*entity.Label]", res)
+	}
+
+	return shipperRes, err
+}
+
+
 func (s *ShipperImpl) TrackingByShippingId(ctx context.Context, shippingId string) (*dto.ShipperRes[[]*entity.Tracking], error) {
 	res, err := cbreaker.Shipper.Execute(func() (any, error) {
 		uri := fmt.Sprintf("%s/v3/order/%s", config.Conf.Shipper.BaseUrl, shippingId)

@@ -62,6 +62,15 @@ func (s *ShippingImpl) Pricing(ctx context.Context, data *dto.PricingReq) (*dto.
 	return res, err
 }
 
+func (s *ShippingImpl) CreateLabel(ctx context.Context, data *dto.CreateLabelReq) (*dto.ShipperRes[*entity.Label], error) {
+	if err := v.Validate.Struct(data); err != nil {
+		return nil, err
+	}
+
+	res, err := s.restfulClient.Shipper.CreateLabel(ctx, data)
+	return res, err
+}
+
 func (s *ShippingImpl) TrackingByShippingId(ctx context.Context, shippingId string) (*dto.ShipperRes[[]*entity.Tracking], error) {
 	if res := s.shippingCache.FindTrackingByShippingId(ctx, shippingId); res != nil {
 		return res, nil

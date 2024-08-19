@@ -9,6 +9,7 @@ import (
 func Create(app *fiber.App, h *handler.Shipping, m *middleware.Middleware) {
 	// admin & super admin
 	app.Add("POST", "/api/shippings/orders", m.VerifyJwt, m.VerifyAdmin, h.ManualShipping)
+	app.Add("POST", "/api/shippings/labels", m.VerifyJwt, m.VerifyAdmin, h.CreateLabel)
 
 	// all
 	app.Add("POST", "/api/shippings/pricings", m.VerifyJwt, h.Pricing)
