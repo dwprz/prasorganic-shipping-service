@@ -58,7 +58,7 @@ func (s *ShipperImpl) ShippingOrder(ctx context.Context, data *entity.ShippingOr
 
 	shippingId, ok := res.(string)
 	if !ok {
-		return "", fmt.Errorf("unexpected type %T (shipping_id)", res)
+		return "", fmt.Errorf("unexpected type %T expected string", res)
 	}
 
 	return shippingId, err
@@ -99,134 +99,199 @@ func (s *ShipperImpl) RequestPickup(ctx context.Context, shippingIds []string) e
 }
 
 func (s *ShipperImpl) Pricing(ctx context.Context, data *dto.PricingReq) (*dto.ShipperRes[*entity.Pricing], error) {
-	uri := config.Conf.Shipper.BaseUrl + "/v3/pricing/domestic"
+	res, err := cbreaker.Shipper.Execute(func() (any, error) {
+		uri := config.Conf.Shipper.BaseUrl + "/v3/pricing/domestic"
 
-	a := fiber.AcquireAgent()
-	defer fiber.ReleaseAgent(a)
+		a := fiber.AcquireAgent()
+		defer fiber.ReleaseAgent(a)
 
-	a.JSON(data)
+		a.JSON(data)
 
-	req := a.Request()
-	req.Header.SetContentType("application/json")
-	req.Header.Set("X-API-KEY", config.Conf.Shipper.ApiKey)
-	req.Header.SetMethod("POST")
-	req.SetRequestURI(uri)
+		req := a.Request()
+		req.Header.SetContentType("application/json")
+		req.Header.Set("X-API-KEY", config.Conf.Shipper.ApiKey)
+		req.Header.SetMethod("POST")
+		req.SetRequestURI(uri)
 
-	if err := a.Parse(); err != nil {
+		if err := a.Parse(); err != nil {
+			return nil, err
+		}
+
+		code, body, _ := a.Bytes()
+		if code != 200 {
+			return nil, &errors.Response{HttpCode: code, Message: string(body)}
+		}
+
+		res := new(dto.ShipperRes[*entity.Pricing])
+		err := json.Unmarshal(body, res)
+
+		return res, err
+	})
+
+	if err != nil {
 		return nil, err
 	}
 
-	code, body, _ := a.Bytes()
-	if code != 200 {
-		return nil, fmt.Errorf(string(body))
+	shipperRes, ok := res.(*dto.ShipperRes[*entity.Pricing])
+	if !ok {
+		return nil, fmt.Errorf("unexpected type %T expected *dto.ShipperRes[*entity.Pricing]", res)
 	}
 
-	res := new(dto.ShipperRes[*entity.Pricing])
-	err := json.Unmarshal(body, res)
-
-	return res, err
+	return shipperRes, err
 }
 
 func (s *ShipperImpl) GetProvinces(ctx context.Context) (*dto.ShipperRes[[]*entity.Province], error) {
-	uri := config.Conf.Shipper.BaseUrl + "/v3/location/country/228/provinces?limit=40"
+	res, err := cbreaker.Shipper.Execute(func() (any, error) {
+		uri := config.Conf.Shipper.BaseUrl + "/v3/location/country/228/provinces?limit=40"
 
-	a := fiber.AcquireAgent()
-	defer fiber.ReleaseAgent(a)
+		a := fiber.AcquireAgent()
+		defer fiber.ReleaseAgent(a)
 
-	req := a.Request()
-	req.Header.Set("X-API-KEY", config.Conf.Shipper.ApiKey)
-	req.Header.SetMethod("GET")
-	req.SetRequestURI(uri)
+		req := a.Request()
+		req.Header.Set("X-API-KEY", config.Conf.Shipper.ApiKey)
+		req.Header.SetMethod("GET")
+		req.SetRequestURI(uri)
 
-	if err := a.Parse(); err != nil {
+		if err := a.Parse(); err != nil {
+			return nil, err
+		}
+
+		code, body, _ := a.Bytes()
+		if code != 200 {
+			return nil, &errors.Response{HttpCode: code, Message: string(body)}
+		}
+
+		res := new(dto.ShipperRes[[]*entity.Province])
+		err := json.Unmarshal(body, res)
+
+		return res, err
+	})
+
+	if err != nil {
 		return nil, err
 	}
 
-	code, body, _ := a.Bytes()
-	if code != 200 {
-		return nil, fmt.Errorf(string(body))
+	shipperRes, ok := res.(*dto.ShipperRes[[]*entity.Province])
+	if !ok {
+		return nil, fmt.Errorf("unexpected type %T expected *dto.ShipperRes[[]*entity.Province]", res)
 	}
 
-	res := new(dto.ShipperRes[[]*entity.Province])
-	err := json.Unmarshal(body, res)
-
-	return res, err
+	return shipperRes, err
 }
 
 func (s *ShipperImpl) GetCitiesByProvinceId(ctx context.Context, provinceId int) (*dto.ShipperRes[[]*entity.City], error) {
-	uri := fmt.Sprintf("%s/v3/location/province/%d/cities?limit=40", config.Conf.Shipper.BaseUrl, provinceId)
+	res, err := cbreaker.Shipper.Execute(func() (any, error) {
+		uri := fmt.Sprintf("%s/v3/location/province/%d/cities?limit=40", config.Conf.Shipper.BaseUrl, provinceId)
 
-	a := fiber.AcquireAgent()
-	defer fiber.ReleaseAgent(a)
+		a := fiber.AcquireAgent()
+		defer fiber.ReleaseAgent(a)
 
-	req := a.Request()
-	req.Header.Set("X-API-KEY", config.Conf.Shipper.ApiKey)
-	req.Header.SetMethod("GET")
-	req.SetRequestURI(uri)
+		req := a.Request()
+		req.Header.Set("X-API-KEY", config.Conf.Shipper.ApiKey)
+		req.Header.SetMethod("GET")
+		req.SetRequestURI(uri)
 
-	if err := a.Parse(); err != nil {
+		if err := a.Parse(); err != nil {
+			return nil, err
+		}
+
+		code, body, _ := a.Bytes()
+		if code != 200 {
+			return nil, &errors.Response{HttpCode: code, Message: string(body)}
+		}
+
+		res := new(dto.ShipperRes[[]*entity.City])
+		err := json.Unmarshal(body, res)
+
+		return res, err
+	})
+
+	if err != nil {
 		return nil, err
 	}
 
-	code, body, _ := a.Bytes()
-	if code != 200 {
-		return nil, fmt.Errorf(string(body))
+	shipperRes, ok := res.(*dto.ShipperRes[[]*entity.City])
+	if !ok {
+		return nil, fmt.Errorf("unexpected type %T expected *dto.ShipperRes[[]*entity.City]", res)
 	}
 
-	res := new(dto.ShipperRes[[]*entity.City])
-	err := json.Unmarshal(body, res)
-
-	return res, err
+	return shipperRes, err
 }
 
 func (s *ShipperImpl) GetSuburbsByCityId(ctx context.Context, cityId int) (*dto.ShipperRes[[]*entity.Suburb], error) {
-	uri := fmt.Sprintf("%s/v3/location/city/%d/suburbs?limit=51", config.Conf.Shipper.BaseUrl, cityId)
+	res, err := cbreaker.Shipper.Execute(func() (any, error) {
+		uri := fmt.Sprintf("%s/v3/location/city/%d/suburbs?limit=51", config.Conf.Shipper.BaseUrl, cityId)
 
-	a := fiber.AcquireAgent()
-	defer fiber.ReleaseAgent(a)
+		a := fiber.AcquireAgent()
+		defer fiber.ReleaseAgent(a)
 
-	req := a.Request()
-	req.Header.Set("X-API-KEY", config.Conf.Shipper.ApiKey)
-	req.Header.SetMethod("GET")
-	req.SetRequestURI(uri)
+		req := a.Request()
+		req.Header.Set("X-API-KEY", config.Conf.Shipper.ApiKey)
+		req.Header.SetMethod("GET")
+		req.SetRequestURI(uri)
 
-	if err := a.Parse(); err != nil {
+		if err := a.Parse(); err != nil {
+			return nil, err
+		}
+
+		code, body, _ := a.Bytes()
+		if code != 200 {
+			return nil, &errors.Response{HttpCode: code, Message: string(body)}
+		}
+
+		res := new(dto.ShipperRes[[]*entity.Suburb])
+		err := json.Unmarshal(body, res)
+
+		return res, err
+	})
+
+	if err != nil {
 		return nil, err
 	}
 
-	code, body, _ := a.Bytes()
-	if code != 200 {
-		return nil, fmt.Errorf(string(body))
+	shipperRes, ok := res.(*dto.ShipperRes[[]*entity.Suburb])
+	if !ok {
+		return nil, fmt.Errorf("unexpected type %T expected *dto.ShipperRes[[]*entity.Suburb]", res)
 	}
 
-	res := new(dto.ShipperRes[[]*entity.Suburb])
-	err := json.Unmarshal(body, res)
-
-	return res, err
+	return shipperRes, err
 }
 
 func (s *ShipperImpl) GetAreasBySuburbId(ctx context.Context, suburbId int) (*dto.ShipperRes[[]*entity.Area], error) {
-	uri := fmt.Sprintf("%s/v3/location/suburb/%d/areas?limit=35", config.Conf.Shipper.BaseUrl, suburbId)
+	res, err := cbreaker.Shipper.Execute(func() (any, error) {
+		uri := fmt.Sprintf("%s/v3/location/suburb/%d/areas?limit=35", config.Conf.Shipper.BaseUrl, suburbId)
 
-	a := fiber.AcquireAgent()
-	defer fiber.ReleaseAgent(a)
+		a := fiber.AcquireAgent()
+		defer fiber.ReleaseAgent(a)
 
-	req := a.Request()
-	req.Header.Set("X-API-KEY", config.Conf.Shipper.ApiKey)
-	req.Header.SetMethod("GET")
-	req.SetRequestURI(uri)
+		req := a.Request()
+		req.Header.Set("X-API-KEY", config.Conf.Shipper.ApiKey)
+		req.Header.SetMethod("GET")
+		req.SetRequestURI(uri)
 
-	if err := a.Parse(); err != nil {
+		if err := a.Parse(); err != nil {
+			return nil, err
+		}
+
+		code, body, _ := a.Bytes()
+		if code != 200 {
+			return nil, &errors.Response{HttpCode: code, Message: string(body)}
+		}
+
+		res := new(dto.ShipperRes[[]*entity.Area])
+		err := json.Unmarshal(body, res)
+
+		return res, err
+	})
+
+	if err != nil {
 		return nil, err
 	}
 
-	code, body, _ := a.Bytes()
-	if code != 200 {
-		return nil, fmt.Errorf(string(body))
+	shipperRes, ok := res.(*dto.ShipperRes[[]*entity.Area])
+	if !ok {
+		return nil, fmt.Errorf("unexpected type %T expected *dto.ShipperRes[[]*entity.Area]", res)
 	}
 
-	res := new(dto.ShipperRes[[]*entity.Area])
-	err := json.Unmarshal(body, res)
-
-	return res, err
+	return shipperRes, err
 }
