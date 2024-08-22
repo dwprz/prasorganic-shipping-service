@@ -58,13 +58,6 @@ func (n *NotificationImpl) Shipper(ctx context.Context, data *entity.Shipper) (e
 		})
 	}
 
-	if data.ExternalStatus.Code == 1340 {
-		err = n.grpcClient.Order.UpdateStatus(ctx, &order.UpdateStatusReq{
-			OrderId: data.OrderId,
-			Status:  string(entity.RETURN_PROCESSING),
-		})
-	}
-
 	if data.ExternalStatus.Code == 1370 {
 		err = n.grpcClient.Order.UpdateStatus(ctx, &order.UpdateStatusReq{
 			OrderId: data.OrderId,
