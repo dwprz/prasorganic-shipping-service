@@ -71,6 +71,15 @@ func (s *ShippingImpl) CreateLabel(ctx context.Context, data *dto.CreateLabelReq
 	return res, err
 }
 
+func (s *ShippingImpl) RequestPickup(ctx context.Context, shippingIds []string) error {
+	if err := v.Validate.Var(shippingIds, `dive,required`); err != nil {
+		return err
+	}
+
+	err := s.restfulClient.Shipper.RequestPickup(ctx, shippingIds)
+	return err
+}
+
 func (s *ShippingImpl) TrackingByShippingId(ctx context.Context, shippingId string) (*entity.Tracking, error) {
 	if res := s.shippingCache.FindTrackingByShippingId(ctx, shippingId); res != nil {
 		return res, nil

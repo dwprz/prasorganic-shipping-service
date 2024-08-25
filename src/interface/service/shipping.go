@@ -11,6 +11,7 @@ type Shipping interface {
 	ShippingOrder(ctx context.Context, data *entity.ShippingOrder) error
 	Pricing(ctx context.Context, data *dto.PricingReq) (*dto.ShipperRes[*entity.Pricing], error)
 	CreateLabel(ctx context.Context, data *dto.CreateLabelReq) (*dto.ShipperRes[*entity.Label], error)
+	RequestPickup(ctx context.Context, shippingIds []string) error
 
 	TrackingByShippingId(ctx context.Context, shippingId string) (*entity.Tracking, error)
 	GetProvinces(ctx context.Context) (*dto.ShipperRes[[]*entity.Province], error)

@@ -7,6 +7,7 @@ import (
 
 	"github.com/dwprz/prasorganic-shipping-service/src/common/errors"
 	"github.com/dwprz/prasorganic-shipping-service/src/common/helper"
+	"github.com/dwprz/prasorganic-shipping-service/src/common/log"
 	"github.com/dwprz/prasorganic-shipping-service/src/infrastructure/cbreaker"
 	"github.com/dwprz/prasorganic-shipping-service/src/infrastructure/config"
 	"github.com/dwprz/prasorganic-shipping-service/src/interface/delivery"
@@ -86,11 +87,11 @@ func (s *ShipperImpl) RequestPickup(ctx context.Context, shippingIds []string) e
 		}
 
 		code, body, _ := a.Bytes()
-		if code != 201 {
+		if code != 200 {
 			return nil, &errors.Response{HttpCode: code, Message: string(body)}
 		}
 
-		helper.LogJSON(body) // log success request pickup
+		log.Logger.Info(string(body)) // log success request pickup
 
 		return nil, nil
 	})

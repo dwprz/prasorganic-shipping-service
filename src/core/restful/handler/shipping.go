@@ -47,6 +47,20 @@ func (s *Shipping) CreateLabel(c *fiber.Ctx) error {
 	return c.Status(201).JSON(fiber.Map{"data": res})
 }
 
+func (s *Shipping) RequestPickup(c *fiber.Ctx) error {
+	var req map[string][]string
+
+	if err := c.BodyParser(&req); err != nil {
+		return err
+	}
+
+	err := s.shippingService.RequestPickup(c.Context(), req["shipping_ids"])
+	if err != nil {
+		return err
+	}
+
+	return c.Status(201).JSON(fiber.Map{"data": "pickup successfully requested"})
+}
 
 func (s *Shipping) Tracking(c *fiber.Ctx) error {
 	shippingId := c.Params("shippingId")
