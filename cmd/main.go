@@ -29,6 +29,8 @@ func main() {
 	handleCloseApp(cancel)
 
 	redisDB := database.NewRedisCluster()
+	defer redisDB.Close()
+
 	shippingCache := cache.NewShipping(redisDB)
 
 	grpcClient := grpc.InitClient()
